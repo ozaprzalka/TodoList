@@ -2,3 +2,8 @@
 body {
   font-family: sans-serif;
 }
+
+.hidden {
+  visibility: hidden;
+  max-height: 0;
+}
