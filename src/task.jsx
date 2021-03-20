@@ -2,7 +2,7 @@ import API_KEY, { API_URL } from "./constant.js";
 import React, { useState, useEffect } from "react";
 import GetOperations from "./operation";
 
-const NewTasks = () => {
+const NewTasks = ({ onNewTask }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const handleTitle = (e) => {
@@ -29,7 +29,7 @@ const NewTasks = () => {
     })
       .then((response) => response.json())
       .then((task) => {
-        console.log("task", task);
+        onNewTask();
       })
       .catch((error) => {
         console.log("add new error", error);
@@ -59,77 +59,157 @@ const NewTasks = () => {
 };
 
 const GetTasks = () => {
-  const [data1, getData] = useState([]);
+  const [data1, setData] = useState([]);
+  const [update, setUpdate] = useState("open");
   const [operationForm, setOperationForm] = useState(false);
-    const getData1 = () => {
-      useEffect(() => {
-        fetch(`${API_URL}/tasks`, {
-          headers: {
-            Authorization: API_KEY,
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            getData(data.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }, [])
-      return data1;
-    }
-
+  const getData1 = () => {
+    fetch(`${API_URL}/tasks`, {
+      headers: {
+        Authorization: API_KEY,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return data1;
+  };
+  useEffect(() => {
+    getData1();
+  }, []);
+  const editTask = (id, stat, title, description) => {
+    const newTaskData = {
+      title: title,
+      description: description,
+      status: stat == "open" && "closed",
+    };
+    fetch(`${API_URL}/tasks/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(newTaskData),
+      headers: {
+        Authorization: API_KEY,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((task) => {
+        onNewTask();
+      })
+      .catch((error) => {
+        console.log("add new error", error);
+      });
+  };
   const toggleOperationForm = () => {
-    setOperationForm(prevState => !prevState);
-    console.log(operationForm)
+    setOperationForm((prevState) => !prevState);
   };
   const removeData = (id) => {
-      fetch(`${API_URL}/tasks/${id}`, {
-        method: 'DELETE',
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: API_KEY,
-        },
+    fetch(`${API_URL}/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: API_KEY,
+      },
+    })
+      .then((response) => {
+        let del = data1.filter((el) => id !== el.id);
+        setData(del);
       })
-        .then((response) => {
-          let del = data1.filter(el => id !== el.id)
-          getData(del)
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      .catch((error) => {
+        console.log(error);
+      });
     return data1;
-  }
+  };
 
-  getData1();
   if (data1) {
     return (
-      <div >
-        <ul>
-          {data1.map((el, index) => {
+      <div>
+        <NewTasks onNewTask={getData1}></NewTasks>
+        {data1.map((el, index) => {
+          if (el.status === "closed") {
             return (
-              <li
-                key={index}
-                style={{ display: "flex", flexDirection: "column", color: 'magenta'}}
-              >
-                <div className="taskTitle" style={{ display: "flex", flexDirection: "row"}}>
-                  <span>{el.title}</span>
+              <>
+                <ul>
+                  <li
+                    className={el.id}
+                    key={index}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      color: "purple",
+                      textDecoration: 'line-through',
+                      textAlign: "left",
+                      marginLeft: '50px'
+                    }}
+                  >
+                    <div
+                      className="taskTitle"
+                      style={{ display: "flex", flexDirection: "row" }}
+                    >
+                      <span>{el.title}</span>
 
-                  <div className="taskBtns" style={{marginLeft: '50px'}}>
-                    <button onClick={toggleOperationForm}>Add</button>
-                    <button type="submit" onClick={() => removeData(el.id)}>Finish</button>
-                  </div>
-                </div>
-
-                <span>{el.description}</span>
-                <span>{el.addedDate}</span>
-                <span>{el.id}</span>
-                <span>{el.status}</span>
-                <GetOperations id={el.id} operationForm={operationForm}></GetOperations>
-              </li>
+                      <div className="taskBtns" style={{ marginLeft: "50px" }}>
+                        <button type="submit" onClick={() => removeData(el.id)}>
+                          End
+                        </button>
+                      </div>
+                    </div>
+                    <span>{el.description}</span>
+                  </li>
+                </ul>
+              </>
             );
-          })}
-        </ul>
+          }
+          if (el.status === 'open') {
+            return (
+              <ul>
+                <li
+                  className={el.id}
+                  key={index}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    color: "magenta",
+                    textAlign: "left"
+                  }}
+                >
+                  <div
+                    className="taskTitle"
+                    style={{ display: "flex", flexDirection: "row" }}
+                  >
+                    <span>{el.title}</span>
+
+                    <div className="taskBtns" style={{ marginLeft: "50px" }}>
+                      <button onClick={toggleOperationForm}>Add</button>
+                      <button
+                        type="submit"
+                        onClick={() =>
+                          editTask(el.id, el.status, el.title, el.description)
+                        }
+                      >
+                        Finish
+                      </button>
+                      <button type="submit" onClick={() => removeData(el.id)}>
+                        End
+                      </button>
+                    </div>
+                  </div>
+
+                  <span>{el.description}</span>
+                  {/* <span>{el.addedDate}</span>
+                  <span>{el.id}</span>
+                  <span>{el.status}</span> */}
+                  <GetOperations
+                    id={el.id}
+                    operationForm={operationForm}
+                  ></GetOperations>
+                </li>
+              </ul>
+            );
+          }
+        })}
       </div>
     );
   }

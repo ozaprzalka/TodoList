@@ -1,14 +1,17 @@
 import API_KEY, { API_URL } from "./constant.js";
 import React, { useState, useEffect } from "react";
 
+
+
 const GetOperations = ({ id, operationForm }) => {
   const [operation, getOperation] = useState([]);
   const [toggle, setToggle] = useState(operationForm);
   const [addOperation, setOperation] = useState([]);
-  console.log('operationForm: ', operationForm);
+  const [timeTogle, setTimeToggle] = useState(false);
+  const [time, saveTime] = useState(0);
   useEffect(() => {
-      setToggle(operationForm)
-  }, [])
+    setToggle(operationForm);
+  }, []);
   useEffect(() => {
     fetch(`${API_URL}/tasks/${id}/operations`, {
       headers: {
@@ -24,108 +27,154 @@ const GetOperations = ({ id, operationForm }) => {
       });
   }, []);
   const createOperation = () => {
-      const newData = {
-          description : addOperation,
-          timeSpent: 0,
-      }
-      fetch(`${API_URL}/tasks/${id}/operations`, {
-        method: "POST",
-        body: JSON.stringify(newData),
-        headers: {
-          Authorization: API_KEY,
-          "Content-Type": "application/json",
-        },
+    const newData = {
+      description: addOperation,
+      timeSpent: 0,
+    };
+    fetch(`${API_URL}/tasks/${id}/operations`, {
+      method: "POST",
+      body: JSON.stringify(newData),
+      headers: {
+        Authorization: API_KEY,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setOperation([...operation, data]);
       })
-        .then((response) => response.json())
-        .then((data) => {
-          setOperation([...operation, data]);
-          console.log(operation)
-        })
-        .catch((error) => {
-          console.log("add new error", error);
-        });
+      .catch((error) => {
+        console.log("add new error", error);
+      });
+  };
+  const deleteOperation = (id) => {
+    fetch(`${API_URL}/operations/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: API_KEY,
+      },
+    })
+      .then((response) => {
+        let del = operation.filter((el) => id !== el.id);
+        getOperation(del);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return operation;
+  };
+  const handleEditTime = (e) => {
+    e.preventDefault();
+    saveTime(e.target.value);
   }
-//   if (form === true) {
-//       return (
-//         <input type="text"
-//         className="form-control"
-//         placeholder="Operation description"
-//         // value={operationDescription}
-//         onChange={e => setOperationDescription(e.target.value)}/>
-//       )
-//   }
+  const editOperation = (id, desc) => {
+    const editData = {
+      description: desc,
+      timeSpent: time,
+    };
+    fetch(`${API_URL}/operations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(editData),
+      headers: {
+        Authorization: API_KEY,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setOperation([...operation, data]);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const toggleAddTime = () => {
+    setTimeToggle((prevState) => !prevState);
+  };
   const renderAddNew = () => {
     if (operationForm === true) {
-        return (
-          <div>{console.log('form', operationForm)}
-          <input type='text' placeholder='description' visibility='visible' name={addOperation} onChange={e => setOperation(e.target.value)}></input>
+      return (
+        <div>
+          <input
+            type="text"
+            placeholder="description"
+            visibility="visible"
+            name={addOperation}
+            onChange={(e) => setOperation(e.target.value)}
+          ></input>
           <button onClick={createOperation}>Add operation</button>
         </div>
-        )
+      );
+    } else {
+      return null;
     }
-    else {
-        return null;
-    }
-  }
+  };
   const renderOperationList = () => {
     if (operation) {
-        return (
-          <div>
-            <ul>{console.log(operation)}
-              {operation.map((el, index) => {
-                return (
-                  <li
-                    key={index}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      margin: "20px",
-                      color: "green",
-                    }}
-                  >
-                    {console.log(operation)}
-                    <span>{el.timeSpent}</span>
+      return (
+        <div>
+          <ul>
+            {operation.map((el, index) => {
+              return (
+                <li
+                  key={index}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    margin: "20px",
+                    color: "green",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{display: "flex", flexDirection: "column"}}>
+                    {/* <span>{el.timeSpent}</span>
                     <span>{el.addedDate}</span>
-                    <span>{el.id}</span>
-                    <span>{el.description}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        );
-      }
-      else {
-          return (
-              <div>No operations to render</div>
-          )
-      }
-  }
+                    <span>{el.id}</span> */}
+                    <div>
+                    <span classname='operationDescription'>{el.description}</span>
+                      <button style={{marginLeft: '30px'}}
+                        clasname="addTime"
+                        onClick={() => toggleAddTime()}
+                      >
+                        Add time
+                      </button>
+                      <button
+                        classname="removeOperation"
+                        onClick={() => deleteOperation(el.id)}
+                      >
+                        finish
+                      </button>
+                    </div>
+                    {timeTogle && (
+                      <>
+                      <input
+                        type="number"
+                        classname="addTimeInput"
+                        placeholder="add time spent"
+                        name={time}
+                        onChange={handleEditTime}
+                      ></input>
+                      <button classname="addTimeBtn" onClick={() => editOperation(el.id, el.description)}>Add time</button>
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    } else {
+      return <div>No operations to render</div>;
+    }
+  };
   return (
-      <>
+    <>
       {renderAddNew()}
       {renderOperationList()}
-      </>
-  )
+    </>
+  );
 };
-
-// const addOperation = ({ id }) => {
-//     const [newOperation, addNewOperation] = ([])
-//   useEffect(() => {
-//     fetch(`${API_URL}/tasks/${id}/operations`, {
-//       method: "POST",
-//       headers: {
-//         Authorization: API_KEY,
-//       },
-//     })
-//       .then((response) => response.json())
-//       .then((data) => {
-//         addNewOperation(data.data);
-//       })
-//       .catch((error) => {
-//         console.log(error);
-//       });
-//   }, []);
-// };
 
 export default GetOperations;

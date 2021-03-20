@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./App.css";
-import GetTasks, {NewTasks} from "./task";
-import GetOperations from "./operation";
+import GetTasks from "./task";
 
 function App() {
   return (
     <>
       <div className="App App-header">
-          <NewTasks></NewTasks>
         <GetTasks></GetTasks>
-        {/* <GetOperations></GetOperations> */}
       </div>
     </>
   );
