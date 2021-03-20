@@ -1,6 +1,15 @@
 import API_KEY, { API_URL } from "./constant.js";
 import React, { useState, useEffect } from "react";
 import GetOperations from "./operation";
+import {
+  FormLabel,
+  FormControl,
+  Input,
+  Button,
+  Container,
+  Box,
+  Text,
+} from "@chakra-ui/react";
 
 const NewTasks = ({ onNewTask }) => {
   const [title, setTitle] = useState("");
@@ -43,24 +52,38 @@ const NewTasks = ({ onNewTask }) => {
   };
 
   return (
-    <form style={{ display: "flex", flexDirection: "column" }}>
-      <h1>New task</h1>
-      <input type="text" value={title} onChange={handleTitle}></input>
-      <input
-        type="text"
-        value={description}
-        onChange={handleDescription}
-      ></input>
-      <button type="submit" onClick={handleButton}>
-        Add task
-      </button>
-    </form>
+    <Container maxW="m" centerContent>
+      <form style={{ display: "flex", flexDirection: "column", width: '50%' }}>
+        <FormControl>
+          <Text fontSize='4xl'>New task</Text>
+          <FormLabel isRequired='true' htmlFor="taskTitle"></FormLabel>
+          <Input
+            type="text"
+            value={title}
+            name="taskTitle"
+            placeholder='title'
+            onChange={handleTitle}
+          ></Input>
+          <FormLabel htmlFor="taskDescription"></FormLabel>
+          <Input
+            type="text"
+            name="taskDescription"
+            placeholder='description'
+            value={description}
+            onChange={handleDescription}
+          ></Input>
+        </FormControl>
+        <Button type="submit" mt={4} colorScheme="pink" onClick={handleButton}>
+          Add task
+        </Button>
+      </form>
+    </Container>
   );
 };
 
 const GetTasks = () => {
   const [data1, setData] = useState([]);
-  const [update, setUpdate] = useState("open");
+  // const [update, setUpdate] = useState("open");
   const [operationForm, setOperationForm] = useState(false);
   const getData1 = () => {
     fetch(`${API_URL}/tasks`, {
@@ -131,82 +154,118 @@ const GetTasks = () => {
           if (el.status === "closed") {
             return (
               <>
-                <ul>
-                  <li
-                    className={el.id}
-                    key={index}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      color: "purple",
-                      textDecoration: 'line-through',
-                      textAlign: "left",
-                      marginLeft: '50px'
-                    }}
-                  >
-                    <div
-                      className="taskTitle"
-                      style={{ display: "flex", flexDirection: "row" }}
-                    >
-                      <span>{el.title}</span>
+                <Container maxW="xl" centerContent>
+                  <Box padding="10" margin="50px 0" width="3xl" borderWidth={2}>
+                    <ul>
 
-                      <div className="taskBtns" style={{ marginLeft: "50px" }}>
-                        <button type="submit" onClick={() => removeData(el.id)}>
-                          End
-                        </button>
-                      </div>
-                    </div>
-                    <span>{el.description}</span>
-                  </li>
-                </ul>
+                      <li
+                        className={el.id}
+                        key={index}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          color: "purple",
+                          textAlign: "left",
+                          marginLeft: "50px",
+                        }}
+                        >
+                        
+
+                        <div
+                          className="taskTitle"
+                          style={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', borderBottom:'1px solid white' }}
+                          >
+                          <Text fontSize='3xl' as='del'>{el.title}</Text>
+
+                          <div
+                            className="taskBtns"
+                            style={{ marginLeft: "50px" }}
+                            >
+                            <Button
+                              type="submit"
+                              colorScheme='pink'
+                              onClick={() => removeData(el.id)}
+                              >
+                              remove
+                            </Button>
+                          </div>
+                        </div>
+                          
+                        <Text fontSize='2xl' as='del'>{el.description}</Text>
+                      </li>
+                    </ul>
+                  </Box>
+                </Container>
               </>
             );
           }
-          if (el.status === 'open') {
+          if (el.status === "open") {
             return (
-              <ul>
-                <li
-                  className={el.id}
-                  key={index}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    color: "magenta",
-                    textAlign: "left"
-                  }}
-                >
-                  <div
-                    className="taskTitle"
-                    style={{ display: "flex", flexDirection: "row" }}
-                  >
-                    <span>{el.title}</span>
-
-                    <div className="taskBtns" style={{ marginLeft: "50px" }}>
-                      <button onClick={toggleOperationForm}>Add</button>
-                      <button
-                        type="submit"
-                        onClick={() =>
-                          editTask(el.id, el.status, el.title, el.description)
-                        }
+              <>
+                <Container maxW="xxl" centerContent>
+                  <Box padding="10" margin="10" width="3xl" borderWidth={2}>
+                    <ul>
+                      <li
+                        className={el.id}
+                        key={index}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          color: "magenta",
+                          textAlign: "left",
+                        }}
                       >
-                        Finish
-                      </button>
-                      <button type="submit" onClick={() => removeData(el.id)}>
-                        End
-                      </button>
-                    </div>
-                  </div>
+                        <div
+                          
+                          className="taskTitle"
+                          style={{ display: "flex", flexDirection: "row", justifyContent: 'space-between', borderBottom:'2px solid white'}}
+                        >
+                          <Text bgGradient="linear(to-l, #7928CA, #FF0080)" bgClip="text" fontSize='3xl'>{el.title}</Text>
 
-                  <span>{el.description}</span>
-                  {/* <span>{el.addedDate}</span>
-                  <span>{el.id}</span>
-                  <span>{el.status}</span> */}
-                  <GetOperations
-                    id={el.id}
-                    operationForm={operationForm}
-                  ></GetOperations>
-                </li>
-              </ul>
+                          <div
+                            className="taskBtns"
+                            style={{ marginLeft: "50px" }}
+                          >
+                            <Button colorScheme='messenger' marginLeft='10' onClick={toggleOperationForm}>Add</Button>
+                            <Button
+                              marginLeft='5'
+                              colorScheme='whatsapp'
+                              type="submit"
+                              onClick={() =>
+                                editTask(
+                                  el.id,
+                                  el.status,
+                                  el.title,
+                                  el.description
+                                )
+                              }
+                            >
+                              Finish
+                            </Button>
+                            <Button
+                              marginLeft='5'
+                              colorScheme='pink'
+                              type="submit"
+                              onClick={() => removeData(el.id)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+
+                        <Text bgGradient="linear(to-l, #7928CA, #FF0080)" bgClip="text" fontSize='2xl'>{el.description}</Text>
+                        {/* <Text>{el.addedDate}</Text>
+                  <Text>{el.id}</Text>
+                  <Text>{el.status}</Text> */}
+                        <GetOperations
+                          id={el.id}
+                          operationForm={operationForm}
+                        ></GetOperations>
+                      </li>
+                    </ul>
+                  </Box>
+                </Container>
+              </>
             );
           }
         })}

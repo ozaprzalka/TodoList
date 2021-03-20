@@ -1,7 +1,12 @@
 import API_KEY, { API_URL } from "./constant.js";
 import React, { useState, useEffect } from "react";
-
-
+import {
+  FormControl,
+  Input,
+  Button,
+  Container,
+  Text,
+} from "@chakra-ui/react";
 
 const GetOperations = ({ id, operationForm }) => {
   const [operation, getOperation] = useState([]);
@@ -67,7 +72,7 @@ const GetOperations = ({ id, operationForm }) => {
   const handleEditTime = (e) => {
     e.preventDefault();
     saveTime(e.target.value);
-  }
+  };
   const editOperation = (id, desc) => {
     const editData = {
       description: desc,
@@ -95,16 +100,20 @@ const GetOperations = ({ id, operationForm }) => {
   const renderAddNew = () => {
     if (operationForm === true) {
       return (
-        <div>
-          <input
-            type="text"
-            placeholder="description"
-            visibility="visible"
-            name={addOperation}
-            onChange={(e) => setOperation(e.target.value)}
-          ></input>
-          <button onClick={createOperation}>Add operation</button>
-        </div>
+        <Container maxW="m" centerContent>
+          <FormControl>
+            <Input
+              type="text"
+              placeholder="next operation"
+              visibility="visible"
+              name={addOperation}
+              onChange={(e) => setOperation(e.target.value)}
+            ></Input>
+          </FormControl>
+          <Button mt={4} colorScheme="pink" onClick={createOperation}>
+            Add operation
+          </Button>
+        </Container>
       );
     } else {
       return null;
@@ -114,55 +123,94 @@ const GetOperations = ({ id, operationForm }) => {
     if (operation) {
       return (
         <div>
-          <ul>
-            {operation.map((el, index) => {
-              return (
-                <li
-                  key={index}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    margin: "20px",
-                    color: "green",
-                    textAlign: "left",
-                  }}
-                >
-                  <div style={{display: "flex", flexDirection: "column"}}>
-                    {/* <span>{el.timeSpent}</span>
-                    <span>{el.addedDate}</span>
-                    <span>{el.id}</span> */}
-                    <div>
-                    <span classname='operationDescription'>{el.description}</span>
-                      <button style={{marginLeft: '30px'}}
-                        clasname="addTime"
-                        onClick={() => toggleAddTime()}
-                      >
-                        Add time
-                      </button>
-                      <button
-                        classname="removeOperation"
-                        onClick={() => deleteOperation(el.id)}
-                      >
-                        finish
-                      </button>
+          <Container maxW="xxl" centerContent>
+            <ul>
+              {operation.map((el, index) => {
+                return (
+                  <li
+                    key={index}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      margin: "20px",
+                      color: "green",
+                      textAlign: "left",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        borderTop: "1px solid white",
+                      }}
+                    >
+                      <div>
+                        <Text
+                          bgGradient="linear(to-r, #7928CA, #FF0080)"
+                          bgClip="text"
+                          fontSize="2xl"
+                          classname="operationDescription"
+                        >
+                          {el.description}
+                        </Text>
+                        <Button
+                          colorScheme="messenger"
+                          marginLeft="10"
+                          clasname="addTime"
+                          onClick={() => toggleAddTime()}
+                        >
+                          Add time
+                        </Button>
+                        <Button
+                          marginLeft="10"
+                          colorScheme="pink"
+                          classname="removeOperation"
+                          onClick={() => deleteOperation(el.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                      {timeTogle && (
+                        <>
+                          <Container width="xs" centerContent margin={4}>
+                            <FormControl>
+                              <Input
+                                marginTop="5"
+                                type="number"
+                                classname="addTimeInput"
+                                placeholder="add time spent"
+                                name={time}
+                                onChange={handleEditTime}
+                              ></Input>
+
+                              {/* <Input
+                              marginTop='5'
+                              type="number"
+                              classname="addTimeInput"
+                              placeholder="add time spent"
+                              name={time}
+                              onChange={handleEditTime}
+                              ></Input> */}
+                            </FormControl>
+                            <Button
+                              marginTop="3"
+                              colorScheme="whatsapp"
+                              classname="addTimeBtn"
+                              onClick={() =>
+                                editOperation(el.id, el.description)
+                              }
+                            >
+                              Add time
+                            </Button>
+                          </Container>
+                        </>
+                      )}
                     </div>
-                    {timeTogle && (
-                      <>
-                      <input
-                        type="number"
-                        classname="addTimeInput"
-                        placeholder="add time spent"
-                        name={time}
-                        onChange={handleEditTime}
-                      ></input>
-                      <button classname="addTimeBtn" onClick={() => editOperation(el.id, el.description)}>Add time</button>
-                      </>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          </Container>
         </div>
       );
     } else {
